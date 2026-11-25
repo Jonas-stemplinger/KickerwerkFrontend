@@ -3,7 +3,7 @@ import { ApiContract } from '../app/core/api-contract';
 export const environment = {
   production: false,
   apiContract: {
-    baseUrl: 'http://localhost:5235',
+    baseUrl: 'https://kickerwerkapi.runasp.net',
     endpoints: {
       login: 'api/auth/login',
       logout: 'api/auth/logout',
