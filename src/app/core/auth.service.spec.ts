@@ -5,7 +5,7 @@ import { API_CONTRACT, ApiContract } from './api-contract';
 import { AuthService } from './auth.service';
 
 const contract: ApiContract = {
-  baseUrl: 'https://kickerwerkapi.runasp.net',
+  baseUrl: 'https://kickerwerkapi.runasp.net/',
   endpoints: {
     login: 'configured-login',
     logout: 'configured-logout',
