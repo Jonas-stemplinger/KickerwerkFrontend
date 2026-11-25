@@ -1,0 +1,68 @@
+<main class="auth-page">
+  <section class="auth-brand" aria-label="Kickerwerk">
+    <a class="brand" routerLink="/login"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span>Kicker<span class="brand-accent">werk</span></span></a>
+    <div class="brand-message">
+      <p class="eyebrow">DEIN SPIEL. DEIN TEAM.</p>
+      <h1>Gemeinsam am Tisch.<br><span>Ganz vorne in der Liste.</span></h1>
+      <p>Alle Spiele, Ergebnisse und Begegnungen an einem Ort.</p>
+    </div>
+    <span class="field-lines" aria-hidden="true"></span>
+    <small class="auth-footnote">Kickerwerk · Spiel verbindet</small>
+  </section>
+
+  <section class="auth-panel">
+    <div class="auth-card">
+      @if (registered()) {
+        <div class="success-mark" aria-hidden="true">✓</div>
+        <h2>Registrierung erfolgreich</h2>
+        <p class="auth-intro">Deine Registrierung war erfolgreich. Dein Konto muss noch von einem Administrator freigeschaltet werden.</p>
+        <a class="button button--primary button--full" routerLink="/login">Zum Login</a>
+      } @else {
+        <p class="eyebrow">{{ isRegistration ? 'NEUES KONTO' : 'WILLKOMMEN ZURÜCK' }}</p>
+        <h2>{{ isRegistration ? 'Konto erstellen' : 'Anmelden' }}</h2>
+        <p class="auth-intro">{{ isRegistration ? 'Erstelle dein Kickerwerk-Konto.' : 'Melde dich an und behalte den Überblick.' }}</p>
+
+        @if (error()) { <div class="alert" role="alert">{{ error() }}</div> }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          @if (isRegistration) {
+            <label class="field">
+              <span>Name</span>
+              <input formControlName="name" autocomplete="name" placeholder="Dein Name">
+              @if (form.controls.name.touched && form.controls.name.invalid) { <small>Bitte gib deinen Namen ein.</small> }
+            </label>
+          }
+          <label class="field">
+            <span>E-Mail-Adresse</span>
+            <input formControlName="email" type="email" autocomplete="email" placeholder="name@beispiel.de">
+            @if (form.controls.email.touched && form.controls.email.invalid) { <small>Bitte gib eine gültige E-Mail-Adresse ein.</small> }
+          </label>
+          <label class="field">
+            <span>Passwort</span>
+            <input formControlName="password" type="password" [attr.autocomplete]="isRegistration ? 'new-password' : 'current-password'" placeholder="Passwort">
+            @if (form.controls.password.touched && form.controls.password.invalid) {
+              <small>Bitte gib ein Passwort ein.</small>
+            }
+          </label>
+          @if (isRegistration) {
+            <label class="field">
+              <span>Passwort wiederholen</span>
+              <input formControlName="confirmPassword" type="password" autocomplete="new-password" placeholder="Passwort wiederholen">
+              @if (passwordMismatch()) { <small>Die Passwörter stimmen nicht überein.</small> }
+            </label>
+          }
+          <button class="button button--primary button--full" type="submit" [disabled]="busy()">
+            {{ busy() ? 'Bitte warten …' : isRegistration ? 'Konto erstellen' : 'Anmelden' }}
+          </button>
+        </form>
+
+        <p class="auth-switch">
+          {{ isRegistration ? 'Bereits registriert?' : 'Noch kein Konto?' }}
+          <a [routerLink]="isRegistration ? '/login' : '/register'">{{ isRegistration ? 'Anmelden' : 'Registrieren' }}</a>
+        </p>
+      }
+    </div>
+    <p class="auth-legal">Sicher anmelden mit deinem Kickerwerk-Konto</p>
+  </section>
+</main>

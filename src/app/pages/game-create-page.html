@@ -1,0 +1,69 @@
+<header class="page-header">
+  <div><p class="eyebrow">NEUE PARTIE</p><h1>Spiel eintragen</h1><p class="page-description">Trage die Teams und das Ergebnis deiner Partie ein.</p></div>
+</header>
+
+@if (error()) { <div class="alert" role="alert">{{ error() }}</div> }
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="game-form">
+  <section class="team-card team-card--green">
+    <header><span class="team-indicator"></span><div><h2>Team Grün</h2><p>Wähle ein oder zwei Spieler</p></div></header>
+    <div class="slots">
+      @for (slot of greenSlots; track slot; let index = $index) {
+        <label class="player-slot">
+          <span>Spieler {{ index + 1 }} <small>· {{ index === 0 ? 'Pflicht' : 'Optional' }}</small></span>
+          <div class="player-input">
+            <input type="search" [value]="selectedPlayers()[slot]?.name ?? ''" placeholder="Spieler suchen" (focus)="slotBeingSearched.set(slot)" (input)="setSearch(slot, $event)">
+            @if (selectedPlayers()[slot]) { <button type="button" aria-label="Spieler entfernen" (click)="clearPlayer(slot)">×</button> }
+          </div>
+          @if (slotBeingSearched() === slot && searchResults().length) {
+            <div class="suggestions" role="listbox">
+              @for (player of searchResults(); track player.id) {
+                <button type="button" role="option" (click)="choosePlayer(slot, player)">{{ player.name }}</button>
+              }
+            </div>
+          }
+        </label>
+      }
+    </div>
+  </section>
+
+  <section class="team-card team-card--yellow">
+    <header><span class="team-indicator"></span><div><h2>Team Gelb</h2><p>Wähle ein oder zwei Spieler</p></div></header>
+    <div class="slots">
+      @for (slot of yellowSlots; track slot; let index = $index) {
+        <label class="player-slot">
+          <span>Spieler {{ index + 1 }} <small>· {{ index === 0 ? 'Pflicht' : 'Optional' }}</small></span>
+          <div class="player-input">
+            <input type="search" [value]="selectedPlayers()[slot]?.name ?? ''" placeholder="Spieler suchen" (focus)="slotBeingSearched.set(slot)" (input)="setSearch(slot, $event)">
+            @if (selectedPlayers()[slot]) { <button type="button" aria-label="Spieler entfernen" (click)="clearPlayer(slot)">×</button> }
+          </div>
+          @if (slotBeingSearched() === slot && searchResults().length) {
+            <div class="suggestions" role="listbox">
+              @for (player of searchResults(); track player.id) {
+                <button type="button" role="option" (click)="choosePlayer(slot, player)">{{ player.name }}</button>
+              }
+            </div>
+          }
+        </label>
+      }
+    </div>
+  </section>
+
+  <section class="winner-card">
+    <div><p class="eyebrow">ERGEBNIS</p><h2>Wer hat gewonnen?</h2><p>Wähle das Gewinnerteam aus.</p></div>
+    <fieldset>
+      <legend class="visually-hidden">Gewinner auswählen</legend>
+      <label class="winner-option"><input formControlName="winner" type="radio" value="green"><span class="winner-swatch winner-swatch--green"></span>Team Grün</label>
+      <label class="winner-option"><input formControlName="winner" type="radio" value="yellow"><span class="winner-swatch winner-swatch--yellow"></span>Team Gelb</label>
+    </fieldset>
+  </section>
+
+  <section class="summary-card">
+    <div><p class="eyebrow">ZUSAMMENFASSUNG</p><h2>Partie prüfen</h2>
+      <p class="summary-line"><strong>Grün</strong> {{ selectedPlayers().greenOne?.name ?? '–' }}{{ selectedPlayers().greenTwo ? ' & ' + selectedPlayers().greenTwo?.name : '' }}</p>
+      <p class="summary-line"><strong>Gelb</strong> {{ selectedPlayers().yellowOne?.name ?? '–' }}{{ selectedPlayers().yellowTwo ? ' & ' + selectedPlayers().yellowTwo?.name : '' }}</p>
+      <p class="summary-line"><strong>Gewinner</strong> {{ form.controls.winner.value === 'green' ? 'Team Grün' : form.controls.winner.value === 'yellow' ? 'Team Gelb' : 'Noch nicht gewählt' }}</p>
+    </div>
+    <button class="button button--primary" type="submit" [disabled]="busy()">{{ busy() ? 'Wird gespeichert …' : 'Spiel speichern' }}</button>
+  </section>
+</form>

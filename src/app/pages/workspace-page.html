@@ -1,0 +1,131 @@
+<header class="page-header">
+  <div>
+    <p class="eyebrow">{{ config.eyebrow }}</p>
+    <h1>{{ kind === 'dashboard' ? 'Hallo, ' + (auth.user()?.name ?? '') : config.title }}</h1>
+    <p class="page-description">{{ config.description }}</p>
+  </div>
+  @if (kind === 'dashboard') {
+    <a class="button button--primary" routerLink="/games/new"><span aria-hidden="true">+</span> Spiel eintragen</a>
+  }
+</header>
+
+@if (kind === 'admin-leaderboard' || kind === 'approvals' || kind === 'login-log') {
+  <nav class="admin-tabs" aria-label="Admin-Bereiche">
+    <a routerLink="/admin/approvals" routerLinkActive="tab--active">Freigaben</a>
+    <a routerLink="/admin/login-log" routerLinkActive="tab--active">Login-Protokoll</a>
+    <a routerLink="/admin/leaderboard" routerLinkActive="tab--active">Bestenliste</a>
+  </nav>
+}
+
+@if (kind === 'games' || kind === 'leaderboard') {
+  <div class="toolbar">
+    <label class="search-field">
+      <span class="search-icon" aria-hidden="true"></span>
+      <input type="search" [placeholder]="kind === 'games' ? 'Spieler suchen' : 'Spieler suchen'" (input)="setSearch($event)">
+    </label>
+    <select aria-label="Sortieren" (change)="setSort($event)">
+      @if (kind === 'games') {
+        <option value="date">Neueste zuerst</option><option value="oldest">Älteste zuerst</option>
+      } @else {
+        <option value="wins">Nach Siegen</option><option value="winRate">Nach Gewinnquote</option>
+      }
+    </select>
+  </div>
+}
+
+@if (loading()) {
+  <section class="state-card" aria-live="polite"><span class="spinner"></span><p>Daten werden geladen …</p></section>
+} @else if (error()) {
+  <section class="state-card state-card--error" role="alert">
+    <span class="state-symbol">!</span><h2>Verbindung nicht verfügbar</h2><p>{{ error() }}</p>
+    <button class="button button--outline" type="button" (click)="load()">Erneut versuchen</button>
+  </section>
+} @else if (dashboard()) {
+  <section class="metric-grid" aria-label="Spielstatistik">
+    <article class="metric-card"><span class="metric-icon metric-icon--green">P</span><p>Gespielte Spiele</p><strong>{{ dashboard()?.gamesPlayed }}</strong><small>Insgesamt</small></article>
+    <article class="metric-card"><span class="metric-icon metric-icon--yellow">S</span><p>Gewonnene Spiele</p><strong>{{ dashboard()?.wins }}</strong><small>Siege</small></article>
+    <article class="metric-card"><span class="metric-icon metric-icon--red">N</span><p>Verlorene Spiele</p><strong>{{ dashboard()?.losses }}</strong><small>Niederlagen</small></article>
+    <article class="metric-card"><span class="metric-icon metric-icon--blue">%</span><p>Gewinnquote</p><strong>{{ dashboard()?.winRate }}<small class="metric-suffix">%</small></strong><small>Aktuelle Quote</small></article>
+  </section>
+  <section class="content-card dashboard-bottom">
+    <div class="section-heading"><div><h2>Letzte Partien</h2><p>Deine zuletzt gespielten Begegnungen</p></div><a routerLink="/games">Alle Spiele</a></div>
+    @if (dashboard()?.recentGames?.length) {
+      @for (game of dashboard()?.recentGames ?? []; track game.id) {
+        <div class="recent-game">
+          <span class="result-dot" [class.result-dot--win]="game.winner === 'green'"></span>
+          <div class="recent-teams"><strong>{{ game.greenPlayers.join(' & ') }}</strong><span>gegen</span><strong>{{ game.yellowPlayers.join(' & ') }}</strong></div>
+          <time>{{ formatDate(game.date) }}</time>
+        </div>
+      }
+    } @else { <p class="empty-note">Noch keine Partien vorhanden.</p> }
+  </section>
+  <aside class="rank-card"><span class="rank-icon" aria-hidden="true">#</span><div><small>DEINE POSITION</small><strong>{{ dashboard()?.rank ? '#' + dashboard()?.rank : '–' }}</strong></div><a routerLink="/leaderboard">Zur Bestenliste <span aria-hidden="true">→</span></a></aside>
+} @else if (kind === 'games') {
+  <section class="content-card">
+    @if (filteredGames().length) {
+      <div class="data-list">
+        @for (game of filteredGames(); track game.id) {
+          <article class="game-row">
+            <time>{{ formatDate(game.date) }}</time>
+            <div class="team-block team-block--green"><span>TEAM GRÜN</span><strong>{{ game.greenPlayers.join(' & ') }}</strong></div>
+            <span class="versus">VS</span>
+            <div class="team-block team-block--yellow"><span>TEAM GELB</span><strong>{{ game.yellowPlayers.join(' & ') }}</strong></div>
+            <span class="winner-pill" [class.winner-pill--yellow]="game.winner === 'yellow'">{{ game.winner === 'green' ? 'Grün gewinnt' : 'Gelb gewinnt' }}</span>
+          </article>
+        }
+      </div>
+    } @else { <div class="empty-state"><h2>Keine Spiele gefunden</h2><p>Hier erscheinen deine Partien, sobald das Backend verbunden ist.</p></div> }
+  </section>
+} @else if (kind === 'leaderboard' || kind === 'admin-leaderboard') {
+  <section class="content-card">
+    @if (sortedLeaderboard().length) {
+      <div class="leaderboard-list">
+        @for (entry of sortedLeaderboard(); track entry.userId; let index = $index) {
+          <article class="leader-row" [class.leader-row--me]="entry.userId === auth.user()?.id">
+            <span class="leader-rank">{{ index + 1 }}</span><span class="leader-avatar">{{ entry.name.slice(0, 1) }}</span>
+            <strong class="leader-name">{{ entry.name }} @if (entry.userId === auth.user()?.id) { <small>Du</small> }</strong>
+            <span class="leader-stat leader-stat--games"><strong>{{ entry.gamesPlayed }}</strong><small>Spiele</small></span>
+            <span class="leader-stat leader-stat--wins"><strong>{{ entry.wins }}</strong><small>Siege</small></span>
+            <span class="leader-stat leader-stat--losses"><strong>{{ entry.losses }}</strong><small>Niederlagen</small></span>
+            <span class="leader-rate">{{ entry.winRate }}%</span>
+          </article>
+        }
+      </div>
+    } @else { <div class="empty-state"><h2>Bestenliste nicht verfügbar</h2><p>Die Rangliste wird geladen, sobald die Backend-Schnittstelle eingerichtet ist.</p></div> }
+  </section>
+} @else if (kind === 'approvals') {
+  <section class="content-card">
+    @if (approvals(data()).length) {
+      <div class="approval-list">
+        @for (user of approvals(data()); track user.id) {
+          <article class="approval-row"><span class="user-avatar user-avatar--light">{{ user.name.slice(0, 1) }}</span><strong>{{ user.name }}</strong><button class="button button--primary" type="button" (click)="approve(user.id)">Freischalten</button></article>
+        }
+      </div>
+    } @else { <div class="empty-state"><h2>Keine offenen Freigaben</h2><p>Neue Registrierungen erscheinen hier zur Prüfung.</p></div> }
+  </section>
+} @else if (kind === 'login-log') {
+  <section class="content-card">
+    @if (loginEvents(data()).length) {
+      @for (event of loginEvents(data()); track $index) {
+        <article class="login-event"><strong>{{ event.userName }}</strong><time>{{ event.dateTime }}</time></article>
+      }
+    } @else { <div class="empty-state"><h2>Keine Anmeldungen vorhanden</h2><p>Erfolgreiche Anmeldungen erscheinen hier.</p></div> }
+  </section>
+} @else {
+  <section class="profile-card">
+    <span class="profile-avatar">{{ profile()?.name?.slice(0, 1) ?? auth.user()?.name?.slice(0, 1) ?? 'K' }}</span>
+    <div class="profile-info">
+      <p class="eyebrow">SPIELERPROFIL</p>
+      <h2>{{ profile()?.name ?? auth.user()?.name }}</h2>
+      <p>{{ profile()?.email ?? 'Profilinformationen werden geladen.' }}</p>
+      @if (profile()) {
+        <div class="profile-stats">
+          <span><strong>{{ profile()?.gamesPlayed }}</strong><small>Spiele</small></span>
+          <span><strong>{{ profile()?.wins }}</strong><small>Siege</small></span>
+          <span><strong>{{ profile()?.losses }}</strong><small>Niederlagen</small></span>
+          <span><strong>{{ profile()?.winRate }}%</strong><small>Gewinnquote</small></span>
+        </div>
+      }
+    </div>
+  </section>
+}

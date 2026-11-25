@@ -1,0 +1,60 @@
+<div class="app-shell">
+  <button class="mobile-menu-toggle" type="button" aria-label="Navigation öffnen"
+    [attr.aria-expanded]="menuOpen()" (click)="menuOpen.update(open => !open)">
+    <span></span><span></span><span></span>
+  </button>
+
+  @if (menuOpen()) {
+    <button class="nav-backdrop" type="button" aria-label="Navigation schließen" (click)="closeMenu()"></button>
+  }
+
+  <aside class="sidebar" [class.sidebar--open]="menuOpen()">
+    <a class="brand" routerLink="/dashboard" (click)="closeMenu()" aria-label="Kickerwerk Dashboard">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span>Kicker<span class="brand-accent">werk</span></span>
+    </a>
+
+    <div class="nav-label">MENÜ</div>
+    <nav class="primary-nav" aria-label="Hauptnavigation">
+      <a routerLink="/dashboard" routerLinkActive="nav-link--active" (click)="closeMenu()">
+        <span class="nav-icon icon-dashboard" aria-hidden="true"></span>Dashboard
+      </a>
+      <a routerLink="/games/new" routerLinkActive="nav-link--active" (click)="closeMenu()">
+        <span class="nav-icon icon-add" aria-hidden="true"></span>Spiel eintragen
+      </a>
+      <a routerLink="/games" routerLinkActive="nav-link--active" (click)="closeMenu()">
+        <span class="nav-icon icon-history" aria-hidden="true"></span>Spielverlauf
+      </a>
+      <a routerLink="/leaderboard" routerLinkActive="nav-link--active" (click)="closeMenu()">
+        <span class="nav-icon icon-ranking" aria-hidden="true"></span>Bestenliste
+      </a>
+      <a routerLink="/profile" routerLinkActive="nav-link--active" (click)="closeMenu()">
+        <span class="nav-icon icon-profile" aria-hidden="true"></span>Mein Profil
+      </a>
+    </nav>
+
+    @if (auth.user()?.role === 'Admin') {
+      <div class="nav-label nav-label--admin">VERWALTUNG</div>
+      <nav class="primary-nav">
+        <a routerLink="/admin" routerLinkActive="nav-link--active" (click)="closeMenu()">
+          <span class="nav-icon icon-admin" aria-hidden="true"></span>Admin Panel
+        </a>
+      </nav>
+    }
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <span class="user-avatar">{{ auth.user()?.name?.slice(0, 1) ?? 'K' }}</span>
+        <span class="user-details"><strong>{{ auth.user()?.name ?? 'Kickerwerk' }}</strong><small>Spieler</small></span>
+      </div>
+      <button class="logout-button" type="button" (click)="logout()">
+        <span class="nav-icon icon-logout" aria-hidden="true"></span>Abmelden
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content" (click)="closeMenu()">
+    @if (logoutError()) { <p class="logout-error" role="alert">{{ logoutError() }}</p> }
+    <router-outlet></router-outlet>
+  </main>
+</div>
