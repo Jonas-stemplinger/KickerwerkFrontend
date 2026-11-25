@@ -54,14 +54,14 @@ export class ApiClient {
       return endpoint;
     }
 
-    if (!this.contract.baseUrl.trim()) {
-      throw new Error('Die Backend-Basisadresse ist noch nicht konfiguriert.');
-    }
-
     let resolvedEndpoint = endpoint.replace(/^\/+/, '');
     for (const [key, value] of Object.entries(pathParams ?? {})) {
       resolvedEndpoint = resolvedEndpoint.replace(`{${key}}`, encodeURIComponent(value));
     }
+    if (!this.contract.baseUrl.trim()) {
+      return `/${resolvedEndpoint}`;
+    }
+
     return `${this.contract.baseUrl.replace(/\/+$/, '')}/${resolvedEndpoint}`;
   }
 }
