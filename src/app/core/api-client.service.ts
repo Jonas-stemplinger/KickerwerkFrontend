@@ -39,7 +39,7 @@ export class ApiClient {
   }
 
   private getCsrfToken(): Observable<string> {
-    const csrfUrl = `${this.contract.baseUrl.replace(/\/+$/, '')}/api/auth/csrf`;
+    const csrfUrl = new URL('/api/auth/csrf', this.contract.baseUrl).toString();
     return this.http.get<{ requestToken: string }>(csrfUrl, { withCredentials: true })
       .pipe(map((response) => response.requestToken));
   }

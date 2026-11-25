@@ -5,7 +5,7 @@ import { API_CONTRACT, ApiContract } from './api-contract';
 import { AuthService } from './auth.service';
 
 const contract: ApiContract = {
-  baseUrl: 'https://api.example.test',
+  baseUrl: 'https://kickerwerkapi.runasp.net',
   endpoints: {
     login: 'configured-login',
     logout: 'configured-logout',
@@ -46,17 +46,17 @@ describe('AuthService', () => {
     let result: unknown;
     auth.login({ email: 'player@example.test', password: 'secret' }).subscribe((user) => result = user);
 
-    const csrf = http.expectOne('https://api.example.test/api/auth/csrf');
+    const csrf = http.expectOne('https://kickerwerkapi.runasp.net/api/auth/csrf');
     csrf.flush({ requestToken: 'test-csrf-token' });
 
-    const login = http.expectOne('https://api.example.test/configured-login');
+    const login = http.expectOne('https://kickerwerkapi.runasp.net/configured-login');
     expect(login.request.method).toBe('POST');
     expect(login.request.withCredentials).toBe(true);
     expect(login.request.headers.get('X-XSRF-TOKEN')).toBe('test-csrf-token');
     expect(login.request.body).toEqual({ email: 'player@example.test', password: 'secret' });
     login.flush(null);
 
-    const session = http.expectOne('https://api.example.test/configured-session');
+    const session = http.expectOne('https://kickerwerkapi.runasp.net/configured-session');
     expect(session.request.withCredentials).toBe(true);
     session.flush({ id: 'u1', name: 'Alex', email: 'player@example.test', roles: ['User'] });
 
