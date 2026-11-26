@@ -22,7 +22,7 @@
       <a routerLink="/games/new" routerLinkActive="nav-link--active" (click)="closeMenu()">
         <span class="nav-icon icon-add" aria-hidden="true"></span>Spiel eintragen
       </a>
-      <a routerLink="/games" routerLinkActive="nav-link--active" (click)="closeMenu()">
+      <a routerLink="/games" routerLinkActive="nav-link--active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
         <span class="nav-icon icon-history" aria-hidden="true"></span>Spielverlauf
       </a>
       <a routerLink="/leaderboard" routerLinkActive="nav-link--active" (click)="closeMenu()">
